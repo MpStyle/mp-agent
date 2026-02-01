@@ -6,6 +6,7 @@ using MpAgent.CLI.Commands;
 using MpAgent.GitLab.MergeRequestReviewer.Agents;
 using MpAgent.GitLab.MergeRequestReviewer.Entities;
 using MpAgent.GitLab.MergeRequestReviewer.Tools;
+using MpAgent.Translate.Agents;
 
 namespace MpAgent.CLI;
 
@@ -37,18 +38,22 @@ internal static class Program
 
                 // Commands
                 services.AddSingleton<MergeRequestReviewHandler>();
+                services.AddSingleton<TranslateHandler>();
 
                 // Agents
                 services.AddSingleton<GitLabReviewAgent>();
+                services.AddSingleton<TranslationAgent>();
             })
             .Build();
 
         // Commands setup
-        var mergeRequestReviewCommand = host.Services.GetRequiredService<MergeRequestReviewHandler>();
+        var mergeRequestReviewHandler = host.Services.GetRequiredService<MergeRequestReviewHandler>();
+        var translateHandler = host.Services.GetRequiredService<TranslateHandler>();
 
         var rootCommand = new RootCommand("Multi-purpose AI agent CLI")
         {
-            mergeRequestReviewCommand.Command
+            mergeRequestReviewHandler.Command,
+            translateHandler.Command
         };
 
         var result = rootCommand.Parse(args);

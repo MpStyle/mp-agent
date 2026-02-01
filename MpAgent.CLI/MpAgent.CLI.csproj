@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MpAgent.GitLab.MergeRequestReviewer\MpAgent.GitLab.MergeRequestReviewer.csproj" />
+      <ProjectReference Include="..\MpAgent.Translate\MpAgent.Translate.csproj" />
     </ItemGroup>
 
     <ItemGroup>
