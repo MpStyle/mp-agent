@@ -1,29 +1,53 @@
 # MpAgent
 
-## Review GitLab Merge Requests
-
-### Architecture overview
+## Architecture overview
 
 ```
 ┌────────────┐
 │  Program   │
 └─────┬──────┘
       │
-┌─────▼───────────────┐
-│       Agent         │
-│ (GitLabReviewAgent) │
-└─────┬───────────────┘
+┌─────▼────────┐
+│    Agent     │
+└─────┬────────┘
       │ 
-┌─────▼───────────────┐
-│     AI Function     │
-│ (GitLabAiFunctions) │
-└─────┬───────────────┘
+┌─────▼────────┐
+│  AI Function │
+└─────┬────────┘
       │ 
-┌─────▼────────────────────┐
-│           Tool           │
-│ (GitLabMergeRequestTool) │
-└──────────────────────────┘
+┌─────▼───────┐
+│    Tool     │
+└─────────────┘
 ```
+
+This section briefly explains the components shown in the diagram and how they are used in the application's pipeline.
+
+- Agent
+  - Role: a high-level orchestrator responsible for the review or workflow logic (for example: reviewing a merge request, translating text, etc.).
+  - Behavior: builds the execution context from CLI inputs, applies validation rules, invokes AI Functions, and aggregates the results into a user-friendly format.
+  - Design: agents are intended to be as stateless as possible and to focus on reasoning and intent (prompt + instructions) rather than direct I/O.
+
+- AI Function
+  - Role: a logical endpoint that exposes structured data and specific operations to the AI (for example: a function that returns merge request metadata and diffs).
+  - Behavior: encapsulates deterministic data reads and transformations (structured JSON) that the agent/AI can use for reasoning.
+  - Benefits: separates reasoning (agent prompts and instructions) from data access, reduces prompt ambiguity, and improves repeatability and testability.
+
+- Tool
+  - Role: components that perform external operations and side effects (for example: HTTP clients for GitLab, filesystem access, etc.).
+  - Behavior: implement API calls, parsing, and low-level transformations; tools should be deterministic, testable, and reusable.
+  - Example: `GitLabMergeRequestTool` performs REST requests to GitLab to fetch merge request information and diffs.
+
+How they are used together (flow):
+1. `Program` (CLI) receives the command and builds the DI container.
+2. The appropriate `Agent` is invoked by the command handler with the provided arguments.
+3. The `Agent` prepares prompts and may call one or more `AI Function`s to retrieve structured data (e.g., metadata and diffs).
+4. `AI Function`s use `Tool`s to perform external calls or read files (for example, reading a `.editorconfig`).
+5. The `Agent` receives the data, guides the AI model (prompt + instructions), and formats the final output for the user.
+
+Relevant design principles:
+- Prefer composition over inheritance: favour small, reusable components.
+- Keep agents stateless: external state should live in tools or external storage, not inside agents.
+- Make tools deterministic and testable: isolate I/O in classes that can be easily mocked in tests.
 
 ---
 
@@ -90,5 +114,3 @@ Notes and troubleshooting
 - If you encounter errors related to the AI service authentication, verify that the GitHub Copilot CLI is installed and that your account is authenticated according to the official GitHub instructions.
 - Double-check your GitLab settings (host and token). You can provide them via `appsettings.json` in the `MpAgent.CLI` folder or via environment variables.
 - The project is designed for extensibility: new commands and agents can be added following the multi-layer architecture shown above.
-
----
