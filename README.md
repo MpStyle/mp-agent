@@ -73,6 +73,19 @@ Commands and arguments
 dotnet run --project MpAgent.CLI -- merge-request-review "https://gitlab.example.com/group/project/-/merge_requests/123"
 ```
 
+- translate <text>
+  - Description: Translate text into English and improve clarity, tone and formality using an AI translation agent. Useful for preparing messages, comments, or code review feedback in English.
+  - Arguments:
+    - `text` (required): the text to translate and improve. For multi-word text or longer passages, wrap the argument in quotes.
+  - Options:
+    - `--formality <level>` (optional): desired formality level. Supported values: `informal`, `neutral` (default), `formal`.
+    - `--context <context>` (optional): the context where the translation will be used (examples: `email`, `chat`, `gitlab_comment`, `documentation`, `general`). Default: `general`.
+  - Example:
+
+```bash
+dotnet run --project MpAgent.CLI -- translate "grazie per il tuo aiuto, ho aggiornato il codice" --formality formal --context gitlab_comment
+```
+
 Notes and troubleshooting
 - If you encounter errors related to the AI service authentication, verify that the GitHub Copilot CLI is installed and that your account is authenticated according to the official GitHub instructions.
 - Double-check your GitLab settings (host and token). You can provide them via `appsettings.json` in the `MpAgent.CLI` folder or via environment variables.

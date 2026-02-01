@@ -47,6 +47,35 @@ The agent behaves like a **senior code reviewer**, not a static analyzer.
 
 ---
 
+## Additional capability: Translation (experimental)
+
+In addition to the code-review agent, MpAgent now includes a lightweight translation and writing-improvement capability driven by an AI agent.
+
+Overview:
+- Command: `translate`
+- Purpose: translate input text into English while improving clarity, fluency, and tone to match a specified context and formality level. This is not a literal translation; the agent preserves meaning and intent while improving expression.
+
+Inputs:
+- Text: the source text to translate
+- Formality: one of `informal`, `neutral`, or `formal` (defaults to `neutral`)
+- Context: usage context such as `email`, `chat`, `gitlab_comment`, or `general` (defaults to `general`)
+
+Behavior and guarantees:
+- The translation agent returns only the translated and improved text (no commentary or metadata).
+- It must preserve original meaning, intent, and factual content.
+- It must not add new information or remove important details.
+
+Implementation notes:
+- Command handler: `MpAgent.CLI/Commands/TranslateHandler.cs` parses arguments and invokes the agent.
+- Agent: `MpAgent.Translate/Agents/TranslationAgent.cs` uses the GitHub Copilot SDK to run a focused prompt that both translates and improves the text.
+- DTO: `MpAgent.Translate/Entities/TranslationRequest.cs` describes the request shape (Text, Context, Formality).
+
+When to use:
+- Drafting or polishing English text for comments, commit messages, emails, or other developer-facing communication.
+- Not intended for high-stakes legal or safety-critical translations without human review.
+
+---
+
 ## Architecture overview
 
 ```
