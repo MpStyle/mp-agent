@@ -1,0 +1,6 @@
+@project_name=
+@per_page=100
+
+GET {{gitlab.base_url}}/api/v4/projects?search=gitlab-org/{{project_name}}&per_page={{per_page}}
+Content-Type: application/json
+Authorization: Bearer {{gitlab.personal_access_token}}

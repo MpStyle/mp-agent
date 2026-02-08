@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -16,6 +17,11 @@ internal static class Program
     {
         // Host and DI setup
         using var host = Host.CreateDefaultBuilder()
+            .ConfigureAppConfiguration((context, config) =>
+            {
+                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .AddJsonFile($"appsettings.development.json", optional: true, reloadOnChange: true);
+            })
             .ConfigureServices((context, services) =>
             {
                 services.AddHttpClient();

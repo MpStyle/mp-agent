@@ -6,7 +6,7 @@ using MpAgent.GitLab.MergeRequestReviewer.Entities.DTOs;
 
 namespace MpAgent.GitLab.MergeRequestReviewer.Tools;
 
-public sealed class GitLabMergeRequestTool
+public sealed partial class GitLabMergeRequestTool
 {
     private readonly HttpClient httpClient;
     private readonly GitLabSettingsOptions settingsOptions;
@@ -24,12 +24,18 @@ public sealed class GitLabMergeRequestTool
     public async Task<GitLabMergeRequestReviewContext> GetMergeRequestAsync(string mergeRequestUrl)
     {
         var parsed = ParseMergeRequestUrl(mergeRequestUrl);
+        var projectId = this.GetProject(parsed.Group, parsed.Project);
+        if (projectId == null)
+        {
+            Console.WriteLine("Invalid project or group. Please check the URL and try again.");
+            throw new ArgumentException("Project not found", nameof(mergeRequestUrl));
+        }
 
-        var info = await GetMergeRequestInfoAsync(parsed.ProjectPath, parsed.MergeRequestIid);
-        var diffs = await GetMergeRequestDiffsAsync(parsed.ProjectPath, parsed.MergeRequestIid);
+        var info = await this.GetMergeRequestInfoAsync(projectId.Value, parsed.MergeRequestIid);
+        var diffs = await this.GetMergeRequestDiffsAsync(projectId.Value, parsed.MergeRequestIid);
 
-        var editorConfig = await GetEditorConfigAsync(
-            parsed.ProjectPath,
+        var editorConfig = await this.GetEditorConfigAsync(
+            projectId.Value,
             info.TargetBranch
         );
 
@@ -41,11 +47,11 @@ public sealed class GitLabMergeRequestTool
     // GitLab API calls
     // -----------------------------
     
-    private async Task<string?> GetEditorConfigAsync(string projectPath, string refName)
+    private async Task<string?> GetEditorConfigAsync(int projectId, string refName)
     {
         // refName = target branch (es. main)
         var url =
-            $"{settingsOptions.BaseUrl}/api/v4/projects/{Uri.EscapeDataString(projectPath)}/repository/files/.editorconfig/raw?ref={refName}";
+            $"{settingsOptions.BaseUrl}/api/v4/projects/{projectId}/repository/files/.editorconfig/raw?ref={refName}";
 
         using var response = await httpClient.GetAsync(url);
 
@@ -55,13 +61,29 @@ public sealed class GitLabMergeRequestTool
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync();
     }
-
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="group"></param>
+    /// <param name="project"></param>
+    /// <returns>Project id</returns>
+    private int? GetProject(string group, string project)
+    {
+        var url = $"{settingsOptions.BaseUrl}/api/v4/projects/{Uri.EscapeDataString($"{group}/{project}")}";
+        using var response = httpClient.GetAsync(url).Result;
+        response.EnsureSuccessStatusCode();
+        using var stream = response.Content.ReadAsStreamAsync().Result;
+        using var json = JsonDocument.ParseAsync(stream).Result;
+        var projectId = json.RootElement.GetProperty("id").GetInt32();
+        return projectId;
+    }
 
     private async Task<GitLabMergeRequestInfo> GetMergeRequestInfoAsync(
-        string projectPath,
+        int projectId,
         int mrIid)
     {
-        var url = $"{settingsOptions.BaseUrl}/api/v4/projects/{Uri.EscapeDataString(projectPath)}/merge_requests/{mrIid}";
+        var url = $"{settingsOptions.BaseUrl}/api/v4/projects/{projectId}/merge_requests/{mrIid}";
         using var response = await httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
@@ -83,10 +105,10 @@ public sealed class GitLabMergeRequestTool
     }
 
     private async Task<IReadOnlyList<GitLabMergeRequestDiff>> GetMergeRequestDiffsAsync(
-        string projectPath,
+        int projectId,
         int mrIid)
     {
-        var url = $"{settingsOptions.BaseUrl}/api/v4/projects/{Uri.EscapeDataString(projectPath)}/merge_requests/{mrIid}/changes";
+        var url = $"{settingsOptions.BaseUrl}/api/v4/projects/{projectId}/merge_requests/{mrIid}/changes";
         using var response = await httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
@@ -115,21 +137,29 @@ public sealed class GitLabMergeRequestTool
     // URL parsing
     // -----------------------------
 
-    private static (string ProjectPath, int MergeRequestIid) ParseMergeRequestUrl(string url)
+    /// <summary>
+    /// Parses a GitLab merge request URL and extracts the group, project, and merge request IID.
+    /// </summary>
+    /// <param name="url"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    private static (string Group, string Project, int MergeRequestIid) ParseMergeRequestUrl(string url)
     {
-        // esempio:
-        // https://gitlab.company.local/group/project/-/merge_requests/42
-        var regex = new Regex(
-            @"https?:\/\/.+\/(?<project>.+?)\/-\/merge_requests\/(?<iid>\d+)",
-            RegexOptions.Compiled);
+        // example:
+        // https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/33101
+        var regex = GitLabMergeRequestRegex();
 
         var match = regex.Match(url);
         if (!match.Success)
-            throw new ArgumentException("Invalid GitLab merge request URL");
+            throw new ArgumentException("Invalid GitLab merge request URL", nameof(url));
 
         return (
+            match.Groups["group"].Value,
             match.Groups["project"].Value,
             int.Parse(match.Groups["iid"].Value)
         );
     }
+
+    [GeneratedRegex(@"https?:\/\/.+?\/(?<group>[^\/]+)\/(?<project>[^\/]+)\/-\/merge_requests\/(?<iid>\d+)", RegexOptions.Compiled)]
+    private static partial Regex GitLabMergeRequestRegex();
 }

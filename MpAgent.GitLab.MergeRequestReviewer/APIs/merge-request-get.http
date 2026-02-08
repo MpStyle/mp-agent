@@ -1,0 +1,7 @@
+# Get project details by project ID: group_name/project_name or project_ids
+@project_id=
+@merge_request_iid=
+
+GET {{gitlab.base_url}}/api/v4/projects/{{project_id}}/merge_requests/{{merge_request_iid}}
+Content-Type: application/json
+Authorization: Bearer {{gitlab.personal_access_token}}
