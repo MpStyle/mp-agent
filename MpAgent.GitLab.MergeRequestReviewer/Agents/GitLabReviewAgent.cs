@@ -11,13 +11,13 @@ public sealed class GitLabReviewAgent(GitLabMergeRequestTool tool) : IAsyncDispo
     private CopilotClient? copilotClient;
     private AIAgent? agent;
 
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (copilotClient != null)
             return;
 
         copilotClient = new CopilotClient();
-        await copilotClient.StartAsync();
+        await copilotClient.StartAsync(cancellationToken);
 
         var gitLabFn = GitLabAiFunctions.CreateMergeRequestFunction(tool);
 

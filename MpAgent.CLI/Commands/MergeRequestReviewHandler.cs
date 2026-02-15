@@ -29,7 +29,7 @@ public class MergeRequestReviewHandler
     {
         try
         {
-            await agent.InitializeAsync();
+            await agent.InitializeAsync(cancellationToken);
             var review = await agent.ReviewAsync(parseResult.GetRequiredValue<string>(UrlArgumentName), cancellationToken);
             Console.WriteLine("\n===== AI CODE REVIEW =====\n");
             Console.WriteLine(review);

@@ -24,11 +24,15 @@ internal static class Program
             })
             .ConfigureServices((context, services) =>
             {
+                // Commands
+                services.AddSingleton<MergeRequestReviewHandler>();
+                services.AddSingleton<TranslateHandler>();
+                
+                // HttpClientFactory for tools that need to make HTTP requests
                 services.AddHttpClient();
 
                 // Bind GitLab settings from configuration (appsettings.json / environment)
-                services.Configure<GitLabSettingsOptions>(
-                    context.Configuration.GetSection("GitLab"));
+                services.Configure<GitLabSettingsOptions>(context.Configuration.GetSection("GitLab"));
 
                 // Also register the concrete GitLabSettingsOptions instance so it can be
                 // injected directly where needed (in addition to IOptions<T>).
@@ -41,10 +45,6 @@ internal static class Program
                         sp.GetRequiredService<IHttpClientFactory>().CreateClient(),
                         sp.GetRequiredService<IOptions<GitLabSettingsOptions>>().Value
                     ));
-
-                // Commands
-                services.AddSingleton<MergeRequestReviewHandler>();
-                services.AddSingleton<TranslateHandler>();
 
                 // Agents
                 services.AddSingleton<GitLabReviewAgent>();

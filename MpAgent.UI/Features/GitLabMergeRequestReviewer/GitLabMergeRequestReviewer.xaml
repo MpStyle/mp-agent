@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MpAgent.UI.Features.GitLabMergeRequestReviewer.GitLabMergeRequestReviewer">
+             xmlns:appState="clr-namespace:MpAgent.AppState;assembly=MpAgent.AppState"
+             x:Class="MpAgent.UI.Features.GitLabMergeRequestReviewer.GitLabMergeRequestReviewer" x:DataType="appState:GitLabMergeRequestReviewerViewModel">
     <VerticalStackLayout
         Padding="30,0"
         Spacing="25">
@@ -16,6 +17,7 @@
             <!-- Row 1 -->
             <Label Text="Merge request url:" VerticalOptions="Center" Width="300" Grid.Row="0" Grid.Column="0" />
             <Entry x:Name="MergeRequestUrlEntry"
+                   Text="{Binding MergeRequestUrl, Mode=TwoWay}"
                    Placeholder="https://gitlab.com/namespace/project/-/merge_requests/123"
                    HorizontalOptions="FillAndExpand" 
                    VerticalOptions="Fill" 
@@ -25,6 +27,7 @@
             <!-- Row 2 -->
             <Label Text="Personal access token:" VerticalOptions="Center" Grid.Row="1" Grid.Column="0" />
             <Entry x:Name="PersonalAccessTokenEntry" 
+                   Text="{Binding PersonalAccessToken, Mode=TwoWay}"
                    Placeholder="Your GitLab personal access token" 
                    IsPassword="True"
                    HorizontalOptions="FillAndExpand" 
@@ -32,12 +35,21 @@
                    Grid.Column="1" />
         </Grid>
 
-        <Button Text="Eval" />
+        <HorizontalStackLayout HorizontalOptions="Fill">
+            <Button Text="Eval" 
+                    Command="{Binding EvalCommand}"
+                    HorizontalOptions="Fill"/>
+        </HorizontalStackLayout>
+        
+        <ActivityIndicator
+            IsRunning="{Binding EvalCommand.IsRunning}"
+            IsVisible="{Binding EvalCommand.IsRunning}" />
 
-        <Editor AutoSize="TextChanges"
+        <Editor Text="{Binding ReviewResult}" 
+            AutoSize="TextChanges"
                 IsReadOnly="True"
                 VerticalOptions="FillAndExpand"
                 Placeholder="Merge request review result..." />
 
     </VerticalStackLayout>
-</ContentView>
+</ContentPage>
