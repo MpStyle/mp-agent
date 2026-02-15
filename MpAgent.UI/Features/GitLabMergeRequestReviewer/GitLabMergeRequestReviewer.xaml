@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MpAgent.UI.Features.GitLabMergeRequestReviewer.GitLabMergeRequestReviewer">
+    <VerticalStackLayout
+        Padding="30,0"
+        Spacing="25">
+
+        <Grid
+            RowDefinitions="Auto,Auto"
+            ColumnDefinitions="Auto,*"
+            RowSpacing="12"
+            ColumnSpacing="12">
+
+            <!-- Row 1 -->
+            <Label Text="Merge request url:" VerticalOptions="Center" Width="300" Grid.Row="0" Grid.Column="0" />
+            <Entry x:Name="MergeRequestUrlEntry"
+                   Placeholder="https://gitlab.com/namespace/project/-/merge_requests/123"
+                   HorizontalOptions="FillAndExpand" 
+                   VerticalOptions="Fill" 
+                   Grid.Row="0" 
+                   Grid.Column="1" />
+
+            <!-- Row 2 -->
+            <Label Text="Personal access token:" VerticalOptions="Center" Grid.Row="1" Grid.Column="0" />
+            <Entry x:Name="PersonalAccessTokenEntry" 
+                   Placeholder="Your GitLab personal access token" 
+                   IsPassword="True"
+                   HorizontalOptions="FillAndExpand" 
+                   Grid.Row="1" 
+                   Grid.Column="1" />
+        </Grid>
+
+        <Button Text="Eval" />
+
+        <Editor AutoSize="TextChanges"
+                IsReadOnly="True"
+                VerticalOptions="FillAndExpand"
+                Placeholder="Merge request review result..." />
+
+    </VerticalStackLayout>
+</ContentView>

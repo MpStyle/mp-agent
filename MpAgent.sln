@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{0C61
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MpAgent.Translate", "MpAgent.Translate\MpAgent.Translate.csproj", "{29043C3D-4722-4D31-BFD1-1D7B5FF38773}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MpAgent.UI", "MpAgent.UI\MpAgent.UI.csproj", "{AF1C9F6F-0B10-45B8-9670-5178A75AE21B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{29043C3D-4722-4D31-BFD1-1D7B5FF38773}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29043C3D-4722-4D31-BFD1-1D7B5FF38773}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29043C3D-4722-4D31-BFD1-1D7B5FF38773}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF1C9F6F-0B10-45B8-9670-5178A75AE21B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF1C9F6F-0B10-45B8-9670-5178A75AE21B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF1C9F6F-0B10-45B8-9670-5178A75AE21B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF1C9F6F-0B10-45B8-9670-5178A75AE21B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0C61467A-832C-4B66-B7F8-A15A04262C22} = {5E72EE98-FD98-4AFA-A62C-EAF08EA73833}
