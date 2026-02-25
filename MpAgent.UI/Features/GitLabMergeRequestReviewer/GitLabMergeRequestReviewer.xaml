@@ -4,52 +4,45 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:appState="clr-namespace:MpAgent.AppState;assembly=MpAgent.AppState"
              x:Class="MpAgent.UI.Features.GitLabMergeRequestReviewer.GitLabMergeRequestReviewer" x:DataType="appState:GitLabMergeRequestReviewerViewModel">
-    <VerticalStackLayout
-        Padding="30,0"
-        Spacing="25">
+    <Grid
+        Padding="10"
+        RowDefinitions="Auto,Auto,Auto,*"
+        ColumnDefinitions="*"
+        RowSpacing="10">
 
         <Grid
+            Grid.Row="0"
             RowDefinitions="Auto,Auto"
-            ColumnDefinitions="Auto,*"
-            RowSpacing="12"
-            ColumnSpacing="12">
+            ColumnDefinitions="Auto,*">
 
             <!-- Row 1 -->
             <Label Text="Merge request url:" VerticalOptions="Center" Width="300" Grid.Row="0" Grid.Column="0" />
             <Entry x:Name="MergeRequestUrlEntry"
                    Text="{Binding MergeRequestUrl, Mode=TwoWay}"
+                   IsEnabled="{Binding IsMergeRequestUrlEnabled}"
                    Placeholder="https://gitlab.com/namespace/project/-/merge_requests/123"
-                   HorizontalOptions="FillAndExpand" 
                    VerticalOptions="Fill" 
                    Grid.Row="0" 
                    Grid.Column="1" />
-
-            <!-- Row 2 -->
-            <Label Text="Personal access token:" VerticalOptions="Center" Grid.Row="1" Grid.Column="0" />
-            <Entry x:Name="PersonalAccessTokenEntry" 
-                   Text="{Binding PersonalAccessToken, Mode=TwoWay}"
-                   Placeholder="Your GitLab personal access token" 
-                   IsPassword="True"
-                   HorizontalOptions="FillAndExpand" 
-                   Grid.Row="1" 
-                   Grid.Column="1" />
         </Grid>
 
-        <HorizontalStackLayout HorizontalOptions="Fill">
+        <HorizontalStackLayout Grid.Row="1" HorizontalOptions="Fill">
             <Button Text="Eval" 
+                    IsEnabled="{Binding IsEvalButtonEnabled}"
                     Command="{Binding EvalCommand}"
                     HorizontalOptions="Fill"/>
         </HorizontalStackLayout>
         
-        <ActivityIndicator
-            IsRunning="{Binding EvalCommand.IsRunning}"
-            IsVisible="{Binding EvalCommand.IsRunning}" />
-
-        <Editor Text="{Binding ReviewResult}" 
-            AutoSize="TextChanges"
+        <ActivityIndicator Grid.Row="2"
+                           IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}" />
+        
+        <Editor Text="{Binding ReviewResult}"
+                Grid.Row="3"
+                AutoSize="Disabled"
                 IsReadOnly="True"
+                HorizontalOptions="FillAndExpand"
                 VerticalOptions="FillAndExpand"
                 Placeholder="Merge request review result..." />
-
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>

@@ -160,6 +160,6 @@ public sealed partial class GitLabMergeRequestTool
         );
     }
 
-    [GeneratedRegex(@"https?:\/\/.+?\/(?<group>[^\/]+)\/(?<project>[^\/]+)\/-\/merge_requests\/(?<iid>\d+)", RegexOptions.Compiled)]
+    [GeneratedRegex(@"https?:\/\/.+?\/(?<group>.+?)\/(?<project>[^\/]+)\/-\/merge_requests\/(?<iid>\d+)", RegexOptions.Compiled)]
     private static partial Regex GitLabMergeRequestRegex();
 }

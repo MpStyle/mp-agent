@@ -43,10 +43,11 @@ public sealed class GitLabReviewAgent(GitLabMergeRequestTool tool) : IAsyncDispo
                - Identify the file path
                - Identify the exact line or line range
                - Quote the relevant code snippet
-               - Classify severity using these colors:
-                 🔴 RED   = mandatory fix, strongly recommended
-                 🟠 ORANGE = important but only recommended
-                 🟢 GREEN = optional suggestion
+               - Classify severity using these levels:
+                 Critical = mandatory fix, high risk
+                 High = strongly recommended fix
+                 Medium = important but only recommended
+                 Low = optional suggestion
             
             4. Language-specific rules:
                - For C#: follow .NET conventions, async correctness, nullability, performance
@@ -60,17 +61,21 @@ public sealed class GitLabReviewAgent(GitLabMergeRequestTool tool) : IAsyncDispo
             
             File: <path>
             
-            - 🔴 [RED]
+            - [Critical]
               Location: lines X-Y
               Rule violated: <editorconfig rule or best practice>
               Explanation: <why>
               Suggested fix: <what to change>
             
-            - 🟠 [ORANGE]
+            - [High]
               Location: lines X-Y
               ...
             
-            - 🟢 [GREEN]
+            - [Medium]
+              Location: lines X-Y
+              ...
+            
+            - [Low]
               Location: lines X-Y
               ...
             

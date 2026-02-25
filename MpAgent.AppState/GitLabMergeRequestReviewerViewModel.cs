@@ -1,29 +1,32 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 using MpAgent.GitLab.MergeRequestReviewer.Agents;
 
 namespace MpAgent.AppState;
 
 public partial class GitLabMergeRequestReviewerViewModel(GitLabReviewAgent agent) : ObservableObject
 {
-    // === STATE ===
+    #region State
+    [ObservableProperty] private string mergeRequestUrl = "";
 
-    [ObservableProperty] private string mergeRequestUrl="";
+    [ObservableProperty] private string reviewResult = "";
 
-    [ObservableProperty] private string personalAccessToken="";
+    [ObservableProperty] private bool isLoading = false;
 
-    [ObservableProperty] private string reviewResult="";
+    [ObservableProperty] private bool isEvalButtonEnabled = false;
+    [ObservableProperty] private bool isMergeRequestUrlEnabled = true;
+    #endregion
 
-    [ObservableProperty] private bool isLoading;
-
-    // === COMMAND ===
-
+    #region Commands
     [RelayCommand]
     private async Task EvalAsync(CancellationToken cancellationToken)
     {
         try
         {
-            ReviewResult = "Processing...";
+            this.IsLoading = true;
+
+            this.ReviewResult = "Processing...";
 
             await agent.InitializeAsync(cancellationToken);
 
@@ -31,15 +34,31 @@ public partial class GitLabMergeRequestReviewerViewModel(GitLabReviewAgent agent
                 MergeRequestUrl,
                 cancellationToken);
 
-            ReviewResult = review;
+            this.ReviewResult = review;
+
+            this.IsLoading = false;
         }
         catch (OperationCanceledException)
         {
-            ReviewResult = "⚠️ Operation cancelled.";
+            this.ReviewResult = "⚠️ Operation cancelled.";
         }
         catch (Exception ex)
         {
-            ReviewResult = $"❌ Error: {ex.Message}";
+            this.ReviewResult = $"❌ Error: {ex.Message}";
         }
     }
+    #endregion
+
+    #region Handlers
+    partial void OnMergeRequestUrlChanged(string value)
+    {
+        this.IsEvalButtonEnabled = !string.IsNullOrEmpty(value.Trim());
+    }
+
+    partial void OnIsLoadingChanged(bool oldValue, bool newValue)
+    {
+        this.IsEvalButtonEnabled = !newValue;
+        this.IsMergeRequestUrlEnabled = !newValue;
+    }
+    #endregion
 }
