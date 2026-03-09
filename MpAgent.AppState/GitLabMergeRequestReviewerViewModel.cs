@@ -26,25 +26,29 @@ public partial class GitLabMergeRequestReviewerViewModel(GitLabReviewAgent agent
         {
             this.IsLoading = true;
 
-            this.ReviewResult = "Processing...";
+            this.ReviewResult = string.Empty; // "Processing...";
 
-            await agent.InitializeAsync(cancellationToken);
+            await agent.InitializeAsync(s =>
+                {
+                    this.ReviewResult += s + "\n";
+                }, () =>
+                {
+                    this.IsLoading = false;
+                }, cancellationToken);
 
-            var review = await agent.ReviewAsync(
+            await agent.ReviewAsync(
                 MergeRequestUrl,
                 cancellationToken);
-
-            this.ReviewResult = review;
-
-            this.IsLoading = false;
         }
         catch (OperationCanceledException)
         {
             this.ReviewResult = "⚠️ Operation cancelled.";
+            this.IsLoading = false;
         }
         catch (Exception ex)
         {
             this.ReviewResult = $"❌ Error: {ex.Message}";
+            this.IsLoading = false;
         }
     }
     #endregion

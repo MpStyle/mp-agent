@@ -1,5 +1,5 @@
 using GitHub.Copilot.SDK;
-using Microsoft.Agents.AI;
+
 using MpAgent.GitLab.MergeRequestReviewer.Functions;
 using MpAgent.GitLab.MergeRequestReviewer.Tools;
 
@@ -9,9 +9,9 @@ namespace MpAgent.GitLab.MergeRequestReviewer.Agents;
 public sealed class GitLabReviewAgent(GitLabMergeRequestTool tool) : IAsyncDisposable
 {
     private CopilotClient? copilotClient;
-    private AIAgent? agent;
+    private CopilotSession? session;
 
-    public async Task InitializeAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(Action<string> callback, Action onFinish, CancellationToken cancellationToken)
     {
         if (copilotClient != null)
             return;
@@ -21,9 +21,17 @@ public sealed class GitLabReviewAgent(GitLabMergeRequestTool tool) : IAsyncDispo
 
         var gitLabFn = GitLabAiFunctions.CreateMergeRequestFunction(tool);
 
-        agent = copilotClient.AsAIAgent(
-            instructions:
-            """
+        this.session = await copilotClient.CreateSessionAsync(new()
+        {
+            OnPermissionRequest = PermissionHandler.ApproveAll,
+            Tools = [gitLabFn],
+            CustomAgents =
+            [
+                new() {
+                    Name = "GitLabReviewAgent",
+                    Description = "Agent specialized in reviewing GitLab merge requests with a focus on C# and TypeScript code quality and style.",
+                    Tools = [gitLabFn.Name],
+                    Prompt = """
             You are a senior software engineer specialized in C# and TypeScript code reviews.
             
             You will receive:
@@ -79,21 +87,37 @@ public sealed class GitLabReviewAgent(GitLabMergeRequestTool tool) : IAsyncDispo
               Location: lines X-Y
               ...
             
-            """,
-            tools: [gitLabFn]
-        );
+            """
+                }
+            ]
+        }, cancellationToken);
+
+        session.On(ev =>
+        {
+            if (ev is AssistantMessageEvent assistantMessageEvent)
+            {
+                callback(assistantMessageEvent.Data.Content);
+            }
+            if (ev is AssistantMessageDeltaEvent deltaEvent)
+            {
+                callback(deltaEvent.Data.DeltaContent);
+            }
+            if (ev is SessionIdleEvent)
+            {
+                onFinish();
+            }
+        });
     }
 
-    public async Task<string> ReviewAsync(string mergeRequestUrl, CancellationToken cancellationToken = default)
+    public async Task ReviewAsync(string mergeRequestUrl, CancellationToken cancellationToken)
     {
-        if (agent == null)
-            throw new InvalidOperationException("Agent not initialized");
+        if (session == null)
+            throw new InvalidOperationException("Session not initialized");
 
         var prompt =
             $"Review the following GitLab merge request:\n{mergeRequestUrl}";
 
-        var response = await agent.RunAsync(prompt, cancellationToken: cancellationToken);
-        return response.Text;
+        await session.SendAsync(new MessageOptions { Prompt = prompt }, cancellationToken: cancellationToken);
     }
 
     public async ValueTask DisposeAsync()
