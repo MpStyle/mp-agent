@@ -1,8 +1,7 @@
 # MpAgent
 
 ## Project purpose
-MpAgent is my personal **AI twin**, designed to automate and assist with real-world
-developer tasks through **AI agents**.
+MpAgent is my personal **AI twin**, designed to automate and assist with real-world developer tasks through **AI agents**.
 
 The application is intentionally built as a **multi-purpose command-line tool**:
 each command triggers a specific agent-driven workflow (for example, automated
@@ -122,3 +121,8 @@ Each agent lives in its own project to keep responsibilities isolated and explic
     - real-world developer workflows
 
 Copilot is encouraged to suggest improvements that align with these principles.
+
+---
+
+## .NET MAUI Guidelines
+- Avoid using `FillAndExpand` as it is considered obsolete in .NET MAUI.
